@@ -1,0 +1,33 @@
+__label__temperature what is the temperature
+__label__temperature how warm is it
+__label__temperature how cold is it
+__label__temperature tell me the temperature
+__label__temperature tell me how warm it is
+__label__temperature do i need a coat
+__label__temperature do i need to turn on the heating
+__label__temperature should i put a blanket on
+__label__temperature is it hot
+__label__temperature is it cold
+__label__temperature does it have more than 20 degree
+__label__ethereum how much ether do i have
+__label__ethereum what is my balance
+__label__ethereum how rich am i
+__label__ethereum tell me my funds
+__label__ethereum do i have money
+__label__ethereum what are the numbers
+__label__ethereum how many coins do i own
+__label__ethereum tell me my current balance
+__label__ethereum am i broke
+__label__ethereum can i afford this
+__label__help i need help
+__label__help please help
+__label__help help me
+__label__help i need assistance
+__label__help what do i do
+__label__help what are my options
+__label__help explain what you can do
+__label__help what are your capabilities
+__label__help which functionality do you have
+__label__help which skills exist
+__label__help hello
+__label__help greetings
