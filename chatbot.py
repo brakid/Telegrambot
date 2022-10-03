@@ -5,13 +5,14 @@ import json
 from datetime import datetime, timedelta
 from telegram import Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from classifier import predict, Labels
+from classifier_bert import predict, Labels
 import atexit
 import os
 
 # load Envvariables
 TOKEN = os.getenv('TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
+print(os.getenv('CONFIG'))
 CONFIG = json.loads(os.getenv('CONFIG'))
 ETHEREUM_URL = os.getenv('ETHEREUM_URL')
 TEMPERATURE_URL = os.getenv('TEMPERATURE_URL')
