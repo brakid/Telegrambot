@@ -23,3 +23,22 @@ In total the bot currently supports 3 intents:
 3. fetch my current balance of [Ethereum](https://ethereum.org/en/) via the [web3](https://web3py.readthedocs.io/en/stable/) Python library(*ETHEREUM*)
 
 Each of the 3 intents has a different handler that generates the response for the chatbot. At the moment the interactions are quite limited, as the chatbot does not include slotfilling or can keep a conversation over multiple turns.
+
+## Extension:
+Instead of training my own classifier, I decided to give [OpenAI](https://openai.com/)'s [GPT-3](https://arxiv.org/abs/2005.14165) model a try to classify various kinds of prompts. GPT-3 (Generative Pre-trained Transformer) is a Large Language Model (LLM) with around 175 billion parameters, making it 1000x larger than BERT (around 110M trainable parameters). 
+
+The critical piece for GPT-3 is to engineer the inout in the right way to retrieve the intended results. As the model is not trained to classify text, as we did for the previous version, and instead is a general text-generating model, we need to tell it what task it should perform (classification), what the classes are and examples for them.
+
+Afterwards the model works suprisingly well in mapping different kinds of prompts onto the classes we defined.
+
+```
+The following classes with examples exist:
+TEMPERATURE: 'How cold is it', 'Do I need to wear gloves', 'Will it snow'
+HELP: 'I need help', 'Support me', 'I am lost'
+ETHEREUM: 'Am I rich', 'How much money do I have', 'Can I buy a new car'
+
+Classify the following input: '{input}'
+Classification: 
+```
+
+The model replies with the class it assigned to the *input*.

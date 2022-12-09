@@ -5,7 +5,8 @@ import json
 from datetime import datetime, timedelta
 from telegram import Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from classifier_bert import predict, Labels
+from labels import Labels
+from classifier_gpt import predict
 import atexit
 import os
 
