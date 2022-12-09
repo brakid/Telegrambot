@@ -11,7 +11,7 @@ In the first version we used the [fasttext](https://fasttext.cc/) library to tra
 
 The address the semantic similarity between words, in version 2, we have switched to use a [BERT Transformer](https://arxiv.org/abs/1810.04805) to embed sentences into a single vector. BERT is a large-scale language model, that has been trained to capture semantic similarities (e.g via a [masked language model task](https://www.projectpro.io/recipes/what-is-masked-language-modeling-transformers)). As the original BERT model is quite large (110m parameters) and GPU memory on the [NVIDIA Jetson Nano 2GB](https://developer.nvidia.com/embedded/jetson-nano-2gb-developer-kit) is limited to 2GB, we are using a minified version of BERT called [DistilBERT](https://arxiv.org/abs/1910.01108). Compared to BERT, DistilBERT is 40% smaller while retaining 97% of the model performance.
 
-As BERT is 'just' embedding a sentence into a semantically rich vector, we need to add a classifier that predicts the intent for a given embedded sentence. We use a standard Multi-level perceptron for that case with 2 layers (inout & output).
+As BERT is 'just' embedding a sentence into a semantically rich vector, we need to add a classifier that predicts the intent for a given embedded sentence. We use a standard Multi-level perceptron for that case with 2 layers (input & output).
 
 The main advantage of using BERT to embed requests is that the chatbot now is able to process requests such as *'do i need gloves'* and correctly predict the intent to be temperature-based even when not having seen the term gloves in the training data. As the language model training part used a large text corpus, it is able to capture the semantics in the embedding, removing this task from the  classifier. This ideally allows us to achieve a better performance on unseed sentences or synonyms for the intent classification.
 
@@ -27,9 +27,9 @@ Each of the 3 intents has a different handler that generates the response for th
 ## Extension:
 Instead of training my own classifier, I decided to give [OpenAI](https://openai.com/)'s [GPT-3](https://arxiv.org/abs/2005.14165) model a try to classify various kinds of prompts. GPT-3 (Generative Pre-trained Transformer) is a Large Language Model (LLM) with around 175 billion parameters, making it 1000x larger than BERT (around 110M trainable parameters). 
 
-The critical piece for GPT-3 is to engineer the inout in the right way to retrieve the intended results. As the model is not trained to classify text, as we did for the previous version, and instead is a general text-generating model, we need to tell it what task it should perform (classification), what the classes are and examples for them.
+The critical piece for GPT-3 is to engineer the prompt in the right way to retrieve the intended results. As the model is not trained to classify text, as we did for the previous version, and instead is a general text-generating model, we need to tell it what task it should perform (classification), what the classes are and examples for them.
 
-Afterwards the model works suprisingly well in mapping different kinds of prompts onto the classes we defined.
+Afterwards the model works suprisingly well in mapping different kinds of chat requests onto the classes we defined:
 
 ```
 The following classes with examples exist:
