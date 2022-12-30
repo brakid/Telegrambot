@@ -124,8 +124,6 @@ def init():
     message_handler = MessageHandler(Filters.text & (~Filters.command), handle_message)
     dispatcher.add_handler(message_handler)
     
-    
-    
     return updater
 
 if __name__ == '__main__':
