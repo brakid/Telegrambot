@@ -8,12 +8,16 @@ from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandle
 from labels import Labels
 from classifier_gpt import predict
 import os
+import logging
+import traceback
+
+logging.basicConfig(level=logging.INFO)
 
 # load Envvariables
 TOKEN = os.getenv('TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-print(os.getenv('CONFIG'))
 CONFIG = json.loads(os.getenv('CONFIG'))
+logging.info(CONFIG)
 ETHEREUM_URL = os.getenv('ETHEREUM_URL')
 TEMPERATURE_URL = os.getenv('TEMPERATURE_URL')
 
@@ -85,23 +89,27 @@ def handle_request(label, message, config):
         return 'I do not understand'
 
 def start(update: Update, context: CallbackContext):
-    print('Id', update.effective_chat.id)
-    context.bot.send_message(chat_id=update.effective_chat.id, text='I\'m your personal bot, please talk to me!')
+    logging.info(f'Id {update.effective_chat.id}')
+    update.message.reply_text('I\'m your personal bot, please talk to me!')
 
 def help(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=handle_help())
+    update.message.reply_text(handle_help())
 
 def handle_message(update: Update, context: CallbackContext):
     if str(update.effective_chat.id) != CHAT_ID:
-        context.bot.send_message(chat_id=update.effective_chat.id, text='No permissions to talk to this bot')
+        update.message.reply_text('No permissions to talk to this bot')
         return
-    
-    label, score = predict(update.message.text)
-    print(label, score, update.message.text)
-    
-    response = handle_request(label, update.message.text, CONFIG)
-    
-    context.bot.send_message(chat_id=update.effective_chat.id, text=response)
+    try:
+        label, score = predict(update.message.text)
+        logging.info(f'{label}, {score}, {update.message.text}')
+        
+        response = handle_request(label, update.message.text, CONFIG)
+        
+        update.message.reply_text(response)
+    except Exception as e:
+        update.message.reply_text('An internal error has occurred, please try again')
+        logging.error(e)
+        traceback.print_exc()
 
 def init():
     updater = Updater(token=TOKEN, use_context=True)
@@ -116,15 +124,16 @@ def init():
     message_handler = MessageHandler(Filters.text & (~Filters.command), handle_message)
     dispatcher.add_handler(message_handler)
     
-    updater.start_polling()
+    
     
     return updater
 
 if __name__ == '__main__':
+    updater = init()
     try:
-        updater = init()
-        print('Started TelegramBot')
+        updater.start_polling()
+        logging.info('Started TelegramBot')
         updater.idle()
     except:
-        print('Stopping TelegramBot')
+        logging.info('Stopping TelegramBot')
         updater.stop()
