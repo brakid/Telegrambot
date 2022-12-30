@@ -7,7 +7,6 @@ from telegram import Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 from labels import Labels
 from classifier_gpt import predict
-import atexit
 import os
 
 # load Envvariables
@@ -84,22 +83,13 @@ def handle_request(label, message, config):
         return handle_temperature(config['loginData'], config['sensorId'])
     else:
         return 'I do not understand'
-    
-updater = Updater(token=TOKEN, use_context=True)
-dispatcher = updater.dispatcher
 
 def start(update: Update, context: CallbackContext):
     print('Id', update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text='I\'m your personal bot, please talk to me!')
-    
-start_handler = CommandHandler('start', start)
-dispatcher.add_handler(start_handler)
 
 def help(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=handle_help())
-    
-help_handler = CommandHandler('help', help)
-dispatcher.add_handler(help_handler)
 
 def handle_message(update: Update, context: CallbackContext):
     if str(update.effective_chat.id) != CHAT_ID:
@@ -113,21 +103,28 @@ def handle_message(update: Update, context: CallbackContext):
     
     context.bot.send_message(chat_id=update.effective_chat.id, text=response)
 
-message_handler = MessageHandler(Filters.text & (~Filters.command), handle_message)
-dispatcher.add_handler(message_handler)
+def init():
+    updater = Updater(token=TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
 
-def cleanup():
-    print('Stopping TelegramBot')
-    updater.stop()
+    start_handler = CommandHandler('start', start)
+    dispatcher.add_handler(start_handler)
+
+    help_handler = CommandHandler('help', help)
+    dispatcher.add_handler(help_handler)
+
+    message_handler = MessageHandler(Filters.text & (~Filters.command), handle_message)
+    dispatcher.add_handler(message_handler)
+    
+    updater.start_polling()
+    
+    return updater
 
 if __name__ == '__main__':
     try:
-        atexit.register(cleanup)
-        updater.start_polling()
+        updater = init()
         print('Started TelegramBot')
         updater.idle()
     except:
-        cleanup()
-    
-    updater.idle()
-    
+        print('Stopping TelegramBot')
+        updater.stop()
