@@ -121,7 +121,13 @@ def cleanup():
     updater.stop()
 
 if __name__ == '__main__':
-    updater.start_polling()
-    print('Started TelegramBot')
-    atexit.register(cleanup)
+    try:
+        atexit.register(cleanup)
+        updater.start_polling()
+        print('Started TelegramBot')
+        updater.idle()
+    except:
+        cleanup()
+    
+    updater.idle()
     
