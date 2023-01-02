@@ -4,3 +4,4 @@ class Labels(Enum):
     HELP = 'help'
     ETHEREUM = 'ethereum'
     TEMPERATURE = 'temperature'
+    CAMERA = 'camera'

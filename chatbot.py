@@ -10,6 +10,7 @@ from classifier_gpt import predict
 import os
 import logging
 import traceback
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,6 +21,23 @@ CONFIG = json.loads(os.getenv('CONFIG'))
 logging.info(CONFIG)
 ETHEREUM_URL = os.getenv('ETHEREUM_URL')
 TEMPERATURE_URL = os.getenv('TEMPERATURE_URL')
+CAMERA_URL = os.getenv('CAMERA_URL')
+
+WORDS = {
+    Labels.CAMERA: ['camera', 'security', 'burglar'],
+    Labels.TEMPERATURE: ['temperature', 'weather', 'rain'],
+    Labels.ETHEREUM: ['ethereum', 'money', 'rich'],
+    Labels.HELP: ['help']
+}
+ 
+def simple_predict(text):
+    cleaned_text = text.lower().strip()
+    for (clazz, words) in WORDS.items():
+        logging.info(clazz)
+        logging.info(words)
+        if np.any([ word in cleaned_text for word in words ]):
+            return clazz, True
+    return None, False
 
 # handle ETHEREUM
 w3 = Web3(Web3.HTTPProvider(ETHEREUM_URL))
@@ -71,12 +89,24 @@ def handle_help():
     return '''
 This chat bot can handle:
 1. requests for the temperature
-2. requests for the Ethereum funds
-3. provide help (this message)
+2. requests for the current view of the appartment
+3. requests for the Ethereum funds
+4. provide help (this message)
     '''
 
 def handle_temperature(login_data, sensor_id):
     return load_temperature(login_data, sensor_id)
+
+def handle_camera(message, loginData):
+    session = requests.Session()
+    session.auth = (loginData['username'], loginData['password'])
+
+    response = session.get(CAMERA_URL)
+    if response.status_code == 200:
+        message.reply_photo(response.content)
+        return 'Camera Image'
+    else:
+        return 'Error while fetching the webcam image'
 
 def handle_request(label, message, config):
     if label == Labels.HELP:
@@ -85,6 +115,8 @@ def handle_request(label, message, config):
         return handle_ethereum(config['address'])
     elif label == Labels.TEMPERATURE:
         return handle_temperature(config['loginData'], config['sensorId'])
+    elif label == Labels.CAMERA:
+        return handle_camera(message, config['cameraLoginData'])
     else:
         return 'I do not understand'
 
@@ -100,10 +132,14 @@ def handle_message(update: Update, context: CallbackContext):
         update.message.reply_text('No permissions to talk to this bot')
         return
     try:
-        label, score = predict(update.message.text)
-        logging.info(f'{label}, {score}, {update.message.text}')
+        label, found = simple_predict(update.message.text)
+        logging.info(f'{label}, {found}')
         
-        response = handle_request(label, update.message.text, CONFIG)
+        if not found:
+            label, score = predict(update.message.text)
+            logging.info(f'{label}, {score}, {update.message.text}')
+        
+        response = handle_request(label, update.message, CONFIG)
         
         update.message.reply_text(response)
     except Exception as e:
