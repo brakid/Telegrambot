@@ -42,3 +42,8 @@ Classification:
 ```
 
 The model replies with the class it assigned to the *input*.
+
+## Extension 2:
+Adding support for sending webcam images: there is a security camera running behind a small Flask Webserver in the home-network that the Telegram Bot (running as a Docker Container) can access, that way, the webcam server is not exposed to the internet and behind the router firewall. As the chat bot responds to a specific chat only (this limits accessibility by anyone else but the configured user), this prevents unwanted access.
+
+In addition, we added a fast-keyword based prediction for common words instead of calling GPT-3 for each input. Only if there is no match based on keywords, GPT-3 is invoked, this reduces latency and the risk of failure (e.g if calls to the Open AI API time out).
