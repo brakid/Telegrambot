@@ -50,37 +50,14 @@ def handle_ethereum(address):
     return f'Your current Ethereum balance is {get_balance(address)}'
 
 # handle TEMPERATURE
-def load_temperature(login_data, sensor_id):
-    login_url = TEMPERATURE_URL + '/api/v1/login'
-    result = requests.post(login_url, json=login_data)
-    
-    if result.status_code != 200:
-        return 'Could not fetch the temperature'
-    
-    token = json.loads(result.text)['token']
-    
-    url = TEMPERATURE_URL + '/api/v1/graphql'
-    headers = {'Authorization': 'Bearer ' + token}
-
-    limit = (datetime.utcnow() - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    query = '''query($sensorId: ID!, $limit: DateTime) {
-    values(sensorId: $sensorId, limit: $limit) {
-      type
-      timestamp
-      value
-    }
-  }
-'''
-    variables = { 'sensorId': sensor_id, 'limit': limit }
-
-    result = requests.post(url, json={'query': query, 'variables': variables}, headers=headers)
+def load_temperature():
+    result = requests.get(TEMPERATURE_URL)
 
     if result.status_code != 200:
         return 'Could not fetch the temperature'
     
     data = json.loads(result.text)
-    temperature = data['data']['values'][0]['value']
+    temperature = data['temperature']
 
     return f'Temperature: {temperature}°C'
 
@@ -95,7 +72,7 @@ This chat bot can handle:
     '''
 
 def handle_temperature(login_data, sensor_id):
-    return load_temperature(login_data, sensor_id)
+    return load_temperature()
 
 def handle_camera(message, loginData):
     session = requests.Session()
